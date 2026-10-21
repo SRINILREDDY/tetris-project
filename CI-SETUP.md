@@ -29,15 +29,13 @@ Docker browser login does not provide credentials to GitHub's runner.
 2. Ten automated tests verify game rules, scoring, collisions and pause/restart.
 3. Docker builds the ARM64 image using the current nginx:stable-alpine base.
 4. A container starts; HTTP checks verify /healthz, the game page and its assets.
-5. Trivy scans the built image. High or Critical findings fail the job, including
-   findings without a fix. The JSON report is saved as a workflow artifact.
-6. If every check succeeds on main, the same image is pushed to Docker Hub as
+5. If every check succeeds on main, the same image is pushed to Docker Hub as
    srinilreddy/tetris-app:<full-Git-commit-SHA>.
 
 Pull requests run checks without logging into Docker Hub or publishing images.
-The image is built once, tested, scanned and then tagged for publication. The
-workflow does not overwrite v1 or latest. Kubernetes deployment and Argo CD will
-be added in a later step.
+The image is built once, tested and then tagged for publication. The workflow
+does not overwrite v1 or latest. Vulnerability scanning is currently removed
+at the user's request. Kubernetes deployment and Argo CD will be added later.
 
 ## Run and review
 
@@ -48,10 +46,8 @@ npm test
 ```
 
 Commit and push these added files, then open the repository's Actions tab.
-If scanning fails, download the trivy-report artifact and review its findings.
-The earlier Docker Scout scan reported High vulnerabilities; rebuilding does
-not guarantee they are fixed. A blocked push is expected while findings remain.
-Trivy and Scout may report different findings because their databases differ.
+This version does not run Trivy or save a vulnerability report. Removing the
+scanner does not remediate any earlier Docker Scout or Trivy findings.
 
 These checks cover engine rules and HTTP delivery. They do not automate browser
 keyboard interaction or prove the image is free of every security issue. Keep
@@ -61,7 +57,7 @@ the manual browser play test as well.
 
 The ubuntu-24.04-arm runner builds and checks linux/arm64 to match your Mac and
 local kind cluster. This is a single-platform image. An x86 Kubernetes node will
-need an amd64 build with equivalent tests and scanning before deployment.
+need an amd64 build with equivalent tests before deployment.
 
 ## References
 
