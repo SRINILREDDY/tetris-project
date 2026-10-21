@@ -9,7 +9,7 @@ metadata:
   name: tetris
   namespace: tetris
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: tetris
