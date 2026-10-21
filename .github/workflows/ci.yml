@@ -1,0 +1,97 @@
+name: Tetris CI
+
+"on":
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tetris-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test-scan:
+    # Matches the ARM64 architecture of your Mac and local kind cluster.
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 20
+    env:
+      IMAGE_NAME: srinilreddy/tetris-app
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js for game tests
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Test game rules
+        run: npm test
+
+      - name: Build container image
+        run: docker build --pull --platform linux/arm64 -t "tetris-ci:$GITHUB_SHA" .
+
+      - name: Test container HTTP endpoints
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run -d --name tetris-ci \
+            -p 127.0.0.1:8080:8080 "tetris-ci:$GITHUB_SHA"
+          curl --fail --silent --show-error --retry 12 --retry-all-errors \
+            --retry-delay 1 --max-time 5 http://127.0.0.1:8080/healthz > /tmp/healthz
+          grep -qx 'ok' /tmp/healthz
+          curl --fail --silent --show-error --max-time 5 \
+            http://127.0.0.1:8080/ > /tmp/tetris.html
+          grep -q '<title>STACK' /tmp/tetris.html
+          for asset in app.js engine.js styles.css; do
+            curl --fail --silent --show-error --max-time 5 \
+              "http://127.0.0.1:8080/$asset" > /tmp/tetris-asset
+            test -s /tmp/tetris-asset
+          done
+
+      - name: Scan image for High and Critical vulnerabilities
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: image
+          image-ref: tetris-ci:${{ github.sha }}
+          format: json
+          output: trivy-report.json
+          severity: HIGH,CRITICAL
+          ignore-unfixed: 'false'
+          exit-code: '1'
+
+      - name: Save vulnerability report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: trivy-report
+          path: trivy-report.json
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Log in to Docker Hub
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push the tested image
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        run: |
+          docker tag "tetris-ci:$GITHUB_SHA" "$IMAGE_NAME:$GITHUB_SHA"
+          docker push "$IMAGE_NAME:$GITHUB_SHA"
+
+      - name: Show container logs and clean up
+        if: always()
+        run: |
+          docker logs tetris-ci || true
+          docker rm -f tetris-ci || true

@@ -1,0 +1,8 @@
+# Send only the files needed to build the static web image.
+**
+!Dockerfile
+!nginx.conf
+!index.html
+!styles.css
+!app.js
+!engine.js
