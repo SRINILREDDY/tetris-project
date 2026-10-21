@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A browser Tetris game. Move, rotate, stack, and clear lines.">
+  <meta name="theme-color" content="#0b111b">
+  <title>STACK — Tetris</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <header class="masthead">
+      <a class="brand" href="./" aria-label="STACK home"><span class="brand-mark" aria-hidden="true">▦</span> STACK<span class="brand-dot">.</span></a>
+      <span class="edition">THE FALLING BLOCK GAME <span>01 / BROWSER EDITION</span></span>
+    </header>
+    <main>
+      <div class="intro">
+        <div><p class="eyebrow">A LITTLE FOCUS. A BETTER STACK.</p><h1>Make room<br>for the next move.</h1></div>
+        <p class="intro-copy">Seven shapes. Endless possibilities.<br>Build your rhythm, clear the lines.</p>
+      </div>
+      <section class="game-layout" aria-label="Tetris game">
+        <div class="board-panel">
+          <div class="board-heading"><span><span class="status-dot"></span><span id="status-label">READY TO PLAY</span></span><span>10 × 20</span></div>
+          <div class="board-wrap">
+            <canvas id="board" width="300" height="600" tabindex="0" aria-label="Tetris board. Arrow keys move and rotate, space drops, P pauses.">Your browser needs canvas support to play.</canvas>
+            <div class="overlay" id="overlay"><span id="overlay-kicker">YOUR NEXT CHALLENGE</span><h2 id="overlay-title">Find your flow.</h2><p id="overlay-copy">Press Start game to begin.</p></div>
+          </div>
+          <div class="board-footer"><span>FILL A ROW. CLEAR YOUR MIND.</span><span id="level-speed">LEVEL 01</span></div>
+        </div>
+        <aside class="sidebar">
+          <div class="stat primary-stat"><span class="label">SCORE</span><output id="score" aria-label="Score">000000</output><div class="best-row"><span>PERSONAL BEST</span><span id="best">000000</span></div></div>
+          <div class="stat-row"><div class="stat"><span class="label">LINES</span><output id="lines" aria-label="Lines cleared">00</output></div><div class="stat"><span class="label">LEVEL</span><output id="level" aria-label="Level">01</output></div></div>
+          <div class="next-card"><span class="label">UP NEXT</span><canvas id="next" width="120" height="100" aria-label="Next piece"></canvas><span class="next-note">THINK ONE MOVE AHEAD</span></div>
+          <div class="action-panel"><button class="start-button" id="start" type="button">Start game <span aria-hidden="true">↗</span></button><button class="pause-button" id="pause" type="button" disabled>Pause <kbd>P</kbd></button></div>
+          <div class="controls-card"><span class="label">THE CONTROLS</span><dl><div><dt>Move</dt><dd><kbd>←</kbd> <kbd>→</kbd></dd></div><div><dt>Rotate</dt><dd><kbd>↑</kbd></dd></div><div><dt>Soft drop</dt><dd><kbd>↓</kbd></dd></div><div><dt>Hard drop</dt><dd><kbd>SPACE</kbd></dd></div><div><dt>Restart</dt><dd><kbd>R</kbd></dd></div></dl></div>
+        </aside>
+      </section>
+      <div class="touch-controls" aria-label="On-screen game controls"><button type="button" data-action="left" aria-label="Move left">←</button><button type="button" data-action="rotate" aria-label="Rotate piece">↻</button><button type="button" data-action="right" aria-label="Move right">→</button><button type="button" data-action="down" aria-label="Soft drop">↓</button><button type="button" data-action="drop" aria-label="Hard drop">DROP</button></div>
+      <p id="announcement" class="sr-only" aria-live="polite"></p>
+    </main>
+    <footer><span>KEEP BUILDING. KEEP GOING.</span><span>Your best score stays in this browser.</span></footer>
+  </div>
+</body>
+</html>
